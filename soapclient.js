@@ -163,16 +163,24 @@ SOAPClient._sendSoapRequest = function(url, method, parameters, async, callback,
 	// get namespace
 	var ns = (wsdl.documentElement.attributes["targetNamespace"] + "" == "undefined") ? wsdl.documentElement.attributes.getNamedItem("targetNamespace").nodeValue : wsdl.documentElement.attributes["targetNamespace"].value;
 	// build SOAP request
-	var sr = 
+	var headerKey = 'security';
+	var sr =
 				"<?xml version=\"1.0\" encoding=\"utf-8\"?>" +
 				"<soap:Envelope " +
 				"xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" " +
 				"xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" " +
-				"xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">" +
-				"<soap:Body>" +
-				"<" + method + " xmlns=\"" + ns + "\">" +
-				parameters.toXml() +
-				"</" + method + "></soap:Body></soap:Envelope>";
+				"xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\" " +
+				"xmlns:bog=\"" + ns + "\" >" +
+					"<soap:Header>" +
+						"<bog:" + headerKey + ">" +
+							parameters.toXml() +
+						"</bog:" + headerKey + ">" +
+					"</soap:Header>" +
+					"<soap:Body>" +
+						"<bog:" + method + ">"+
+						"</bog:" + method + ">"+
+					"</soap:Body>"+
+				"</soap:Envelope>";
 	// send request
 	var xmlHttp = SOAPClient._getXmlHttp();
 	if (SOAPClient.username && SOAPClient.password){
@@ -183,7 +191,6 @@ SOAPClient._sendSoapRequest = function(url, method, parameters, async, callback,
 	else
 		xmlHttp.open("POST", url, async);
 	var soapaction = ((ns.lastIndexOf("/") != ns.length - 1) ? ns + "/" : ns) + encodeURIComponent(method);
-	xmlHttp.setRequestHeader("SOAPAction", soapaction);
 	xmlHttp.setRequestHeader("Content-Type", "text/xml; charset=utf-8");
 	if(async)
 	{
