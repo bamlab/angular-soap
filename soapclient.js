@@ -1,26 +1,26 @@
 /*****************************************************************************\
 
  Javascript "SOAP Client" library
- 
+
  @version: 2.4 - 2007.12.21
  @author: Matteo Casati - http://www.guru4.net/
- 
+
 \*****************************************************************************/
 
 function SOAPClientParameters()
 {
 	var _pl = new Array();
-	this.add = function(name, value) 
+	this.add = function(name, value)
 	{
-		_pl[name] = value; 
-		return this; 
+		_pl[name] = value;
+		return this;
 	}
 	this.toXml = function()
 	{
 		var xml = "";
 		for(var p in _pl)
 		{
-			switch(typeof(_pl[p])) 
+			switch(typeof(_pl[p]))
 			{
                 case "string":
                 case "number":
@@ -32,7 +32,7 @@ function SOAPClientParameters()
                     break;
             }
 		}
-		return xml;	
+		return xml;
 	}
 }
 SOAPClientParameters._serialize = function(o)
@@ -49,7 +49,7 @@ SOAPClientParameters._serialize = function(o)
             // Date
             if(o.constructor.toString().indexOf("function Date()") > -1)
             {
-        
+
                 var year = o.getFullYear().toString();
                 var month = (o.getMonth() + 1).toString(); month = (month.length == 1) ? "0" + month : month;
                 var date = o.getDate().toString(); date = (date.length == 1) ? "0" + date : date;
@@ -140,9 +140,9 @@ SOAPClient._loadWsdl = function(url, method, parameters, async, callback)
 	}
 	else
 		xmlHttp.open("GET", url + "?wsdl", async);
-	if(async) 
+	if(async)
 	{
-		xmlHttp.onreadystatechange = function() 
+		xmlHttp.onreadystatechange = function()
 		{
 			if(xmlHttp.readyState == 4)
 				SOAPClient._onLoadWsdl(url, method, parameters, async, callback, xmlHttp);
@@ -185,9 +185,9 @@ SOAPClient._sendSoapRequest = function(url, method, parameters, async, callback,
 	var soapaction = ((ns.lastIndexOf("/") != ns.length - 1) ? ns + "/" : ns) + encodeURIComponent(method);
 	xmlHttp.setRequestHeader("SOAPAction", soapaction);
 	xmlHttp.setRequestHeader("Content-Type", "text/xml; charset=utf-8");
-	if(async) 
+	if(async)
 	{
-		xmlHttp.onreadystatechange = function() 
+		xmlHttp.onreadystatechange = function()
 		{
 			if(xmlHttp.readyState == 4)
 				SOAPClient._onSendSoapRequest(method, async, callback, wsdl, xmlHttp);
@@ -198,7 +198,7 @@ SOAPClient._sendSoapRequest = function(url, method, parameters, async, callback,
 		return SOAPClient._onSendSoapRequest(method, async, callback, wsdl, xmlHttp);
 }
 
-SOAPClient._onSendSoapRequest = function(method, async, callback, wsdl, req) 
+SOAPClient._onSendSoapRequest = function(method, async, callback, wsdl, req)
 {
 	var o = null;
 	var nd = SOAPClient._getElementsByTagName(req.responseXML, method + "Result");
@@ -211,7 +211,7 @@ SOAPClient._onSendSoapRequest = function(method, async, callback, wsdl, req)
 		    if(async || callback)
 		        o = new Error(500, req.responseXML.getElementsByTagName("faultstring")[0].childNodes[0].nodeValue);
 			else
-			    throw new Error(500, req.responseXML.getElementsByTagName("faultstring")[0].childNodes[0].nodeValue);			
+			    throw new Error(500, req.responseXML.getElementsByTagName("faultstring")[0].childNodes[0].nodeValue);
 		}
 	}
 	else
@@ -268,7 +268,7 @@ SOAPClient._extractValue = function(node, wsdlTypes)
 	switch(SOAPClient._getTypeFromWsdl(node.parentNode.nodeName, wsdlTypes).toLowerCase())
 	{
 		default:
-		case "s:string":			
+		case "s:string":
 			return (value != null) ? value + "" : "";
 		case "s:boolean":
 			return value + "" == "true";
@@ -287,8 +287,8 @@ SOAPClient._extractValue = function(node, wsdlTypes)
 				value = value.replace(/T/gi," ");
 				value = value.replace(/-/gi,"/");
 				var d = new Date();
-				d.setTime(Date.parse(value));										
-				return d;				
+				d.setTime(Date.parse(value));
+				return d;
 			}
 	}
 }
@@ -296,21 +296,21 @@ SOAPClient._getTypesFromWsdl = function(wsdl)
 {
 	var wsdlTypes = new Array();
 	// IE
-	var ell = wsdl.getElementsByTagName("s:element");	
+	var ell = wsdl.getElementsByTagName("s:element");
 	var useNamedItem = true;
 	// MOZ
 	if(ell.length == 0)
 	{
-		ell = wsdl.getElementsByTagName("element");	     
+		ell = wsdl.getElementsByTagName("element");
 		useNamedItem = false;
 	}
 	for(var i = 0; i < ell.length; i++)
 	{
 		if(useNamedItem)
 		{
-			if(ell[i].attributes.getNamedItem("name") != null && ell[i].attributes.getNamedItem("type") != null) 
+			if(ell[i].attributes.getNamedItem("name") != null && ell[i].attributes.getNamedItem("type") != null)
 				wsdlTypes[ell[i].attributes.getNamedItem("name").nodeValue] = ell[i].attributes.getNamedItem("type").nodeValue;
-		}	
+		}
 		else
 		{
 			if(ell[i].attributes["name"] != null && ell[i].attributes["type"] != null)
@@ -337,19 +337,19 @@ SOAPClient._getElementsByTagName = function(document, tagName)
 	return document.getElementsByTagName(tagName);
 }
 // private: xmlhttp factory
-SOAPClient._getXmlHttp = function() 
+SOAPClient._getXmlHttp = function()
 {
 	try
 	{
-		if(window.XMLHttpRequest) 
+		if(window.XMLHttpRequest)
 		{
 			var req = new XMLHttpRequest();
 			// some versions of Moz do not support the readyState property and the onreadystate event so we patch it!
-			if(req.readyState == null) 
+			if(req.readyState == null)
 			{
 				req.readyState = 1;
-				req.addEventListener("load", 
-									function() 
+				req.addEventListener("load",
+									function()
 									{
 										req.readyState = 4;
 										if(typeof req.onreadystatechange == "function")
@@ -359,7 +359,7 @@ SOAPClient._getXmlHttp = function()
 			}
 			return req;
 		}
-		if(window.ActiveXObject) 
+		if(window.ActiveXObject)
 			return new ActiveXObject(SOAPClient._getXmlHttpProgID());
 	}
 	catch (ex) {}
